@@ -44,62 +44,60 @@ public class RestOperations {
 				.header("Authorization", basicAuthStr)
 				.build();
 
-				client.sendAsync(request, BodyHandlers.ofString())
+		client.sendAsync(request, BodyHandlers.ofString())
 			    	.thenApply(HttpResponse::body)
 			    	.thenAccept(System.out::println)
 			    	.join();
 				
 				
-				System.out.println ("*****get Object Properties *****");	
-				request = HttpRequest.newBuilder()
-						.uri(new URI(pathObject))
-						.GET()
-						.header("Authorization", basicAuthStr)
-						.build();
+		System.out.println ("*****get Object Properties *****");	
+		request = HttpRequest.newBuilder()
+				.uri(new URI(pathObject))
+				.GET()
+				.header("Authorization", basicAuthStr)
+				.build();
 				
-				client.sendAsync(request, BodyHandlers.ofString())
-			    	.thenApply(HttpResponse::body)
-			    	.thenAccept(System.out::println)
-			    	.join();
+		client.sendAsync(request, BodyHandlers.ofString())
+			  	.thenApply(HttpResponse::body)
+			  	.thenAccept(System.out::println)
+			   	.join();
 		
 				
-				System.out.println ("*****get Object Content *****");
-				request = HttpRequest.newBuilder()
-						.uri(new URI(pathContent))
-						.GET()
-						.header("Authorization", basicAuthStr)
-						.build();
-				
-				CompletableFuture<String> response=client.sendAsync(request, BodyHandlers.ofString())
-														.thenApply(HttpResponse::body);
-				
-				String content=response.get().toString();
-				//GET Conent file URL
-				String fileURL=content.substring(content.indexOf("\"ACS\",\"href\":"));
-				fileURL=fileURL.substring("\"ACS\",\"href\":\"".length(), fileURL.indexOf("\"},"));
+		System.out.println ("*****get Object Content *****");
+		request = HttpRequest.newBuilder()
+				.uri(new URI(pathContent))
+				.GET()
+				.header("Authorization", basicAuthStr)
+				.build();
 		
-				request = HttpRequest.newBuilder()
-						.uri(new URI(fileURL))
-						.GET()
-						.header("Authorization", basicAuthStr)
-						.build();
+		CompletableFuture<String> response=client.sendAsync(request, BodyHandlers.ofString())
+				.thenApply(HttpResponse::body);
 				
-				client.send(request, BodyHandlers.ofFile(Paths.get("C:/Temp/pdf.pdf")));
-
-
-				System.out.println ("*****create Folder on /Temp *****");
-				String json = "{\"properties\" : {\"object_name\" : \"RESTFOLDER\", \"r_object_type\" :\"dm_folder\"}}";
-				request = HttpRequest.newBuilder()
-						.uri(new URI(pathFolder))
-						.POST(BodyPublishers.ofString(json))
-						.headers("Authorization", basicAuthStr,"content-type","application/vnd.emc.documentum+json")
-						.build();
+		String content=response.get().toString();
+		//GET Conent file URL in a very dirty way
+		String fileURL=content.substring(content.indexOf("\"ACS\",\"href\":"));
+		fileURL=fileURL.substring("\"ACS\",\"href\":\"".length(), fileURL.indexOf("\"},"));
 		
-				client.sendAsync(request, BodyHandlers.ofString())
-					.thenApply(HttpResponse::body)
-					.thenAccept(System.out::println)
-					.join();
+		request = HttpRequest.newBuilder()
+				.uri(new URI(fileURL))
+				.GET()
+				.header("Authorization", basicAuthStr)
+				.build();
+				
+		client.send(request, BodyHandlers.ofFile(Paths.get("C:/Temp/pdf.pdf")));
 
+		System.out.println ("*****create Folder on /Temp *****");
+		String json = "{\"properties\" : {\"object_name\" : \"RESTFOLDER\", \"r_object_type\" :\"dm_folder\"}}";
+		request = HttpRequest.newBuilder()
+				.uri(new URI(pathFolder))
+				.POST(BodyPublishers.ofString(json))
+				.headers("Authorization", basicAuthStr,"content-type","application/vnd.emc.documentum+json")
+				.build();
+		
+		client.sendAsync(request, BodyHandlers.ofString())
+				.thenApply(HttpResponse::body)
+				.thenAccept(System.out::println)
+				.join();
 
 		System.out.println ("*****create Documentum on /Temp *****");
 		json = "{\"properties\" : {\"object_name\" : \"TESTDOCUMENT\", \"r_object_type\" :\"dm_document\"}}";  
